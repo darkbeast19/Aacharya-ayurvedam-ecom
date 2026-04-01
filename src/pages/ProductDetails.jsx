@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Check, ShieldCheck, Loader } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { getApiPath } from '../api';
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -11,7 +12,7 @@ const ProductDetails = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch(`/api/products/${id}`)
+    fetch(getApiPath(`/api/products/${id}`))
       .then(res => {
         if (!res.ok) throw new Error('Product not found');
         return res.json();

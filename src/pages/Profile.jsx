@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Package, MapPin, User, LogOut, Plus, Trash2, Loader, Clock, CheckCircle, Truck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { getApiPath } from '../api';
 
 const Profile = () => {
   const { user, updateAddress, logout } = useAuth();
@@ -17,7 +18,7 @@ const Profile = () => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) return;
-    fetch('/api/orders/myorders', {
+    fetch(getApiPath('/api/orders/myorders'), {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())

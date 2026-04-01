@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, User as UserIcon, AlertCircle, Loader } from 'lucide-react';
+import { getApiPath } from '../api';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -25,7 +26,7 @@ const Auth = () => {
       const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
       const body = isLogin ? { email, password } : { name, email, password };
 
-      const res = await fetch(endpoint, {
+      const res = await fetch(getApiPath(endpoint), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

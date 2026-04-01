@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { doshas } from '../data/products';
 import { ArrowRight, Leaf, ShieldCheck, HeartPulse, Loader } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getApiPath } from '../api';
 
 const Home = () => {
   const [headline, setHeadline] = useState('Balance Your Mind, Body & Spirit naturally.');
@@ -10,7 +11,7 @@ const Home = () => {
   const [loadingProducts, setLoadingProducts] = useState(true);
 
   useEffect(() => {
-    fetch('/api/content/homepage')
+    fetch(getApiPath('/api/content/homepage'))
       .then(res => res.json())
       .then(data => {
         if (data.headline) setHeadline(data.headline);
@@ -20,7 +21,7 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    fetch('/api/products')
+    fetch(getApiPath('/api/products'))
       .then(res => res.json())
       .then(data => {
         setFeaturedProducts(data.slice(0, 3));

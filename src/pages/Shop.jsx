@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, ShoppingBag, Loader } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { getApiPath } from '../api';
 
 const Shop = () => {
   const [products, setProducts] = useState([]);
@@ -13,7 +14,7 @@ const Shop = () => {
   const categories = ['All', 'Stress Relief', 'Digestive Health', 'Hair Care', 'Immunity'];
 
   useEffect(() => {
-    fetch('/api/products')
+    fetch(getApiPath('/api/products'))
       .then(res => res.json())
       .then(data => {
         setProducts(data);

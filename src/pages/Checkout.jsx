@@ -3,6 +3,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Loader, ShoppingBag, MapPin, CreditCard, AlertCircle } from 'lucide-react';
+import { getApiPath } from '../api';
 
 // Load Razorpay script once
 const loadRazorpay = () => {
@@ -152,7 +153,7 @@ const Checkout = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const rzpRes = await fetch('/api/orders/razorpay/create', {
+      const rzpRes = await fetch(getApiPath('/api/orders/razorpay/create'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ amount: totalPrice }),
@@ -231,7 +232,7 @@ const Checkout = () => {
         totalPrice,
       };
 
-      const res = await fetch('/api/orders', {
+      const res = await fetch(getApiPath('/api/orders'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(orderData),

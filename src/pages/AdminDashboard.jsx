@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getApiPath } from '../api';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('content');
@@ -8,7 +9,7 @@ const AdminDashboard = () => {
 
   // Load existing content
   useEffect(() => {
-    fetch('/api/content/homepage')
+    fetch(getApiPath('/api/content/homepage'))
       .then(res => res.json())
       .then(data => {
         if(data && data.headline) setHomepageText(data.headline);
@@ -18,7 +19,7 @@ const AdminDashboard = () => {
 
   const handleSaveContent = async () => {
     try {
-      const res = await fetch('/api/content/homepage', {
+      const res = await fetch(getApiPath('/api/content/homepage'), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
