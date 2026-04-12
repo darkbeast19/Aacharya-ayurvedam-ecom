@@ -1,4 +1,4 @@
-const dns = require('dns');
+yes do it const dns = require('dns');
 dns.setDefaultResultOrder('ipv4first');
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
@@ -28,16 +28,26 @@ const connectDB = async () => {
 };
 connectDB();
 
+const path = require('path');
+
 // Basic route
-app.get('/', (req, res) => {
-  res.send('API is running...');
-});
+// app.get('/', (req, res) => {
+//   res.send('API is running...');
+// });
 
 // Routes
 app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/content', require('./routes/contentRoutes'));
+
+// Serve frontend
+const frontendDir = path.join(__dirname, '../dist');
+app.use(express.static(frontendDir));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendDir, 'index.html'));
+});
 
 const PORT = process.env.PORT || 5000;
 
