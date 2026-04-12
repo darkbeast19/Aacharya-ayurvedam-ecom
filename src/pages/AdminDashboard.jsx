@@ -11,6 +11,11 @@ const AdminDashboard = () => {
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
 
+  // Products
+  const [products, setProducts] = useState([]);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+
   // Website Content
   const [homepageText, setHomepageText] = useState('Reclaim Your Balance. Rooted in 5,000 years of Ayurvedic tradition.');
   const [aboutText, setAboutText] = useState('We believe in natural healing.');
@@ -68,6 +73,22 @@ const AdminDashboard = () => {
       }).catch(() => {});
   }, []);
 
+  const fetchProducts = async () => {
+    setIsLoadingProducts(true);
+    try {
+      const res = await fetch(getApiPath('/api/products'));
+      const data = await res.json();
+      setProducts(data);
+    } catch {
+      showMessage('❌ Failed to fetch products');
+    }
+    setIsLoadingProducts(false);
+  };
+
+  useEffect(() => {
+    if (activeTab === 'products') fetchProducts();
+  }, [activeTab]);
+
   const showMessage = (msg) => {
     setMessage(msg);
     setTimeout(() => setMessage(''), 3000);
@@ -93,6 +114,55 @@ const AdminDashboard = () => {
       showMessage('❌ Network error. Check your connection.');
     }
     setSaving(false);
+  };
+
+  const handleSaveProduct = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const isNew = !editingProduct._id;
+      const url = isNew ? '/api/products' : `/api/products/${editingProduct._id}`;
+      const method = isNew ? 'POST' : 'PUT';
+
+      const res = await fetch(getApiPath(url), {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user?.token}`
+        },
+        body: JSON.stringify(editingProduct)
+      });
+
+      if (res.ok) {
+        showMessage('✅ Product saved successfully!');
+        setEditingProduct(null);
+        fetchProducts();
+      } else {
+        const err = await res.json();
+        showMessage(`❌ Failed to save: ${err.message}`);
+      }
+    } catch {
+      showMessage('❌ Network error. Check your connection.');
+    }
+    setSaving(false);
+  };
+
+  const handleDeleteProduct = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+    try {
+      const res = await fetch(getApiPath(`/api/products/${id}`), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${user?.token}` }
+      });
+      if (res.ok) {
+        showMessage('✅ Product deleted.');
+        fetchProducts();
+      } else {
+        showMessage('❌ Failed to delete.');
+      }
+    } catch {
+      showMessage('❌ Network error.');
+    }
   };
 
   const handleSaveContent = () => {
@@ -377,8 +447,87 @@ const AdminDashboard = () => {
           {/* Products Tab */}
           {activeTab === 'products' && (
             <div>
-              <h2>Manage Products</h2>
-              <p className="text-muted">Product list and editor will appear here.</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <div>
+                  <h2 style={{ margin: 0 }}><ShoppingBag size={20} style={{ display: 'inline', marginRight: '8px' }} />Manage Products</h2>
+                  <p className="text-muted text-sm">Add, edit, or remove store products.</p>
+                </div>
+                {!editingProduct && (
+                  <button className="btn btn-primary" onClick={() => setEditingProduct({ name: '', price: '', category: '', image: '', description: '', ingredients: '', dosha: '', countInStock: '' })}>
+                    + Add New Product
+                  </button>
+                )}
+              </div>
+
+              {editingProduct ? (
+                <form onSubmit={handleSaveProduct} style={{ background: 'var(--color-surface)', padding: '24px', borderRadius: '12px' }}>
+                  <h3>{editingProduct._id ? 'Edit Product' : 'Create New Product'}</h3>
+                  <div className="input-group" style={{ marginTop: '16px' }}>
+                    <label>Product Name</label>
+                    <input required className="input-field" type="text" value={editingProduct.name} onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })} />
+                  </div>
+                  <div style={{ display: 'flex', gap: '16px' }}>
+                    <div className="input-group" style={{ flex: 1 }}>
+                      <label>Price (₹)</label>
+                      <input required className="input-field" type="number" value={editingProduct.price} onChange={(e) => setEditingProduct({ ...editingProduct, price: e.target.value })} />
+                    </div>
+                    <div className="input-group" style={{ flex: 1 }}>
+                      <label>Stock Count</label>
+                      <input required className="input-field" type="number" value={editingProduct.countInStock} onChange={(e) => setEditingProduct({ ...editingProduct, countInStock: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="input-group">
+                    <label>Category (e.g., Supplements, Oils)</label>
+                    <input required className="input-field" type="text" value={editingProduct.category} onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })} />
+                  </div>
+                  <div className="input-group">
+                    <label>Image URL (Optional)</label>
+                    <input className="input-field" type="text" value={editingProduct.image} onChange={(e) => setEditingProduct({ ...editingProduct, image: e.target.value })} />
+                  </div>
+                  <div className="input-group">
+                    <label>Dosha (e.g., Vata, Pitta, Kapha, Tridoshic)</label>
+                    <input className="input-field" type="text" value={editingProduct.dosha} onChange={(e) => setEditingProduct({ ...editingProduct, dosha: e.target.value })} />
+                  </div>
+                  <div className="input-group">
+                    <label>Key Ingredients</label>
+                    <input className="input-field" type="text" value={editingProduct.ingredients} onChange={(e) => setEditingProduct({ ...editingProduct, ingredients: e.target.value })} />
+                  </div>
+                  <div className="input-group">
+                    <label>Full Description</label>
+                    <textarea required className="input-field" rows="4" value={editingProduct.description} onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })} />
+                  </div>
+                  <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                    <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : 'Save Product'}</button>
+                    <button type="button" className="btn btn-outline" onClick={() => setEditingProduct(null)}>Cancel</button>
+                  </div>
+                </form>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {isLoadingProducts ? (
+                    <p>Loading products...</p>
+                  ) : products.length > 0 ? (
+                    products.map(product => (
+                      <div key={product._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: 'var(--color-surface)', borderRadius: '10px', border: '1px solid rgba(0,0,0,0.05)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                          <div style={{ width: '50px', height: '50px', borderRadius: '8px', overflow: 'hidden', background: '#fff' }}>
+                            <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          </div>
+                          <div>
+                            <h4 style={{ margin: '0 0 4px', fontSize: '1rem' }}>{product.name}</h4>
+                            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>₹{product.price} | Stock: {product.countInStock}</p>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button style={{ padding: '6px 12px', fontSize: '0.8rem', background: '#e0f2fe', color: '#0369a1', border: 'none', borderRadius: '6px', cursor: 'pointer' }} onClick={() => setEditingProduct(product)}>Edit</button>
+                          <button style={{ padding: '6px 12px', fontSize: '0.8rem', background: '#fee2e2', color: '#b91c1c', border: 'none', borderRadius: '6px', cursor: 'pointer' }} onClick={() => handleDeleteProduct(product._id)}>Delete</button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-muted">No products found. Add a new product to get started.</p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
