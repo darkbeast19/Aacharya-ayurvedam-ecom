@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, Loader, ShoppingBag, MapPin, CreditCard, AlertCircle } from 'lucide-react';
+import { CheckCircle, Loader, ShoppingBag, MapPin, CreditCard, AlertCircle, MessageCircle } from 'lucide-react';
 import { getApiPath } from '../api';
 
 // Load Razorpay script once
@@ -17,6 +17,8 @@ const loadRazorpay = () => {
   });
 };
 
+const WHATSAPP_DEFAULT = '919999999999';
+
 const Checkout = () => {
   const { cart, cartTotal, clearCart } = useCart();
   const { user } = useAuth();
@@ -28,6 +30,7 @@ const Checkout = () => {
   const [orderId, setOrderId] = useState('');
   const [error, setError] = useState('');
   const [pincodeLoading, setPincodeLoading] = useState(false);
+  const [whatsappNumber, setWhatsappNumber] = useState(WHATSAPP_DEFAULT);
 
   const [shipping, setShipping] = useState({
     name: user?.name || '',
@@ -48,6 +51,15 @@ const Checkout = () => {
   useEffect(() => {
     if (cart.length === 0 && !isSuccess) navigate('/shop');
   }, [cart]);
+
+  useEffect(() => {
+    fetch(getApiPath('/api/content/settings'))
+      .then(res => res.json())
+      .then(data => {
+        if (data.whatsappNumber) setWhatsappNumber(data.whatsappNumber);
+      })
+      .catch(() => {});
+  }, []);
 
   // Real-time validation
   const validateField = (name, value) => {
@@ -124,7 +136,6 @@ const Checkout = () => {
     // Final check
     const fieldsToValidate = ['name', 'phone', 'email', 'address', 'city', 'state', 'postalCode'];
     let isValid = true;
-    const newErrors = {};
 
     fieldsToValidate.forEach(field => {
       if (!validateField(field, shipping[field])) {
@@ -202,6 +213,22 @@ const Checkout = () => {
     setIsProcessing(true);
     setError('');
     await saveOrder(null, 'Cash on Delivery');
+  };
+
+  const handleWhatsAppOrder = () => {
+    const itemsList = cart.map(item => `• ${item.name} x${item.quantity} — ₹${(Number(item.price) * item.quantity).toFixed(2)}`).join('\n');
+    const message = encodeURIComponent(
+      `Hello! I'd like to place an order:\n\n${itemsList}\n\n` +
+      `Subtotal: ₹${cartTotal.toFixed(2)}\n` +
+      `Shipping: ${shippingPrice === 0 ? 'FREE' : `₹${shippingPrice}`}\n` +
+      `Total: ₹${totalPrice.toFixed(2)}\n\n` +
+      `Shipping Details:\n` +
+      `Name: ${shipping.name}\n` +
+      `Phone: ${shipping.phone}\n` +
+      `Address: ${shipping.address}, ${shipping.city}, ${shipping.state} - ${shipping.postalCode}\n\n` +
+      `Please confirm my order. Thank you!`
+    );
+    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
   };
 
   const saveOrder = async (paymentResult, paymentMethod) => {
@@ -440,6 +467,16 @@ const Checkout = () => {
                   </div>
                   {isProcessing && <Loader size={20} style={{ marginLeft: 'auto', animation: 'spin 1s linear infinite' }} />}
                 </button>
+
+                <button className="payment-option-btn whatsapp-payment-btn" onClick={handleWhatsAppOrder} disabled={isProcessing}>
+                  <div className="payment-option-icon" style={{ background: '#25D366' }}>
+                    <MessageCircle size={20} color="#fff" />
+                  </div>
+                  <div>
+                    <h4>WhatsApp Order</h4>
+                    <p>Place your order directly via WhatsApp chat</p>
+                  </div>
+                </button>
               </div>
 
               <button className="btn btn-outline" style={{ width: '100%', marginTop: '20px' }} onClick={() => setStep(1)}>
@@ -506,13 +543,18 @@ const Checkout = () => {
         .error-text { color: #ef4444; font-size: 0.75rem; margin-top: 4px; display: block; }
         .inline-loader { animation: spin 1s linear infinite; vertical-align: middle; margin-left: 5px; }
 
-        .payment-option-btn { width: 100%; display: flex; align-items: center; gap: 16px; background: var(--color-surface); border: 2px solid rgba(0,0,0,0.06); border-radius: 14px; padding: 16px 20px; cursor: pointer; text-align: left; transition: all 0.2s; color: var(--color-text); }
+        .payment-option-btn { width: 100%; display: flex; align-items: center; gap: 16px; background: var(--color-surface); border: 2px solid rgba(0,0,0,0.06); border-radius: 14px; padding: 16px 20px; cursor: pointer; text-align: left; transition: all 0.2s; color: var(--color-text); font-family: var(--font-family); }
         [data-theme='dark'] .payment-option-btn { border-color: rgba(255,255,255,0.06); }
         .payment-option-btn:hover:not(:disabled) { border-color: var(--color-primary); background: rgba(74,124,89,0.05); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         .payment-option-btn:disabled { opacity: 0.7; cursor: not-allowed; }
         .payment-option-btn h4 { margin: 0 0 2px; font-size: 1rem; }
         .payment-option-btn p { margin: 0; font-size: 0.8rem; color: var(--color-text-muted); }
         .payment-option-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+
+        .whatsapp-payment-btn:hover:not(:disabled) {
+          border-color: #25D366;
+          background: rgba(37, 211, 102, 0.05);
+        }
 
         .summary-item { display: flex; align-items: center; gap: 12px; }
         .summary-item-img { position: relative; width: 52px; height: 52px; border-radius: 8px; background: var(--color-surface); overflow: hidden; flex-shrink: 0; }

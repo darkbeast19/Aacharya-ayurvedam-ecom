@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import { doshas } from '../data/products';
-import { ArrowRight, Leaf, ShieldCheck, HeartPulse, Loader } from 'lucide-react';
+import { ArrowRight, Leaf, ShieldCheck, HeartPulse, Loader, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getApiPath } from '../api';
+
+const WHATSAPP_DEFAULT = '919999999999';
 
 const Home = () => {
   const [headline, setHeadline] = useState('Balance Your Mind, Body & Spirit naturally.');
   const [aboutText, setAboutText] = useState('Discover authentic Ayurvedic formulations tailored to your unique dosha. Sourced from organic herbs, designed for modern life.');
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const [whatsappNumber, setWhatsappNumber] = useState(WHATSAPP_DEFAULT);
 
   useEffect(() => {
     fetch(getApiPath('/api/content/homepage'))
@@ -18,6 +21,14 @@ const Home = () => {
         if (data.about) setAboutText(data.about);
       })
       .catch(err => console.log('Using default content', err));
+
+    // Load WhatsApp settings
+    fetch(getApiPath('/api/content/settings'))
+      .then(res => res.json())
+      .then(data => {
+        if (data.whatsappNumber) setWhatsappNumber(data.whatsappNumber);
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -33,6 +44,11 @@ const Home = () => {
       });
   }, []);
 
+  const openWhatsApp = () => {
+    const message = encodeURIComponent('Hello! I would like to place an order from Aacharya Ayurvedam. Please assist me.');
+    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+  };
+
   return (
     <div className="home-page fade-in">
       {/* Hero Section */}
@@ -45,8 +61,13 @@ const Home = () => {
               {aboutText}
             </p>
             <div className="hero-actions delay-300">
-              <Link to="/shop" className="btn btn-primary">Shop Our Collection <ArrowRight size={18} /></Link>
-              <Link to="/consultation" className="btn btn-outline">Find Your Dosha</Link>
+              <Link to="/shop" className="btn btn-hero-primary">
+                Buy Now <ArrowRight size={18} />
+              </Link>
+              <button onClick={openWhatsApp} className="btn btn-whatsapp">
+                <MessageCircle size={18} />
+                WhatsApp Order
+              </button>
             </div>
           </div>
           <div className="hero-image-wrapper">
@@ -162,7 +183,62 @@ const Home = () => {
           display: flex;
           gap: 16px;
           margin-top: 40px;
+          flex-wrap: wrap;
         }
+
+        /* Hero CTA Buttons */
+        .btn-hero-primary {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          padding: 16px 36px;
+          background: linear-gradient(135deg, var(--color-primary) 0%, #4a7c59 100%);
+          color: #fff;
+          border: none;
+          border-radius: var(--radius-full);
+          font-weight: 700;
+          font-size: 1.05rem;
+          cursor: pointer;
+          transition: all var(--transition-normal);
+          box-shadow: 0 4px 20px rgba(74, 124, 89, 0.35);
+          letter-spacing: 0.3px;
+        }
+        .btn-hero-primary:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 8px 30px rgba(74, 124, 89, 0.45);
+          background: linear-gradient(135deg, #4a7c59 0%, var(--color-primary) 100%);
+        }
+        .btn-hero-primary:active {
+          transform: translateY(-1px);
+        }
+
+        .btn-whatsapp {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          padding: 16px 32px;
+          background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+          color: #fff;
+          border: none;
+          border-radius: var(--radius-full);
+          font-weight: 700;
+          font-size: 1.05rem;
+          cursor: pointer;
+          transition: all var(--transition-normal);
+          box-shadow: 0 4px 20px rgba(37, 211, 102, 0.3);
+          letter-spacing: 0.3px;
+        }
+        .btn-whatsapp:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 8px 30px rgba(37, 211, 102, 0.4);
+          background: linear-gradient(135deg, #128C7E 0%, #25D366 100%);
+        }
+        .btn-whatsapp:active {
+          transform: translateY(-1px);
+        }
+
         .hero-image-wrapper {
           position: relative;
           border-radius: var(--radius-lg);
@@ -219,6 +295,8 @@ const Home = () => {
           .hero-container, .trust-grid, .dosha-cards, .products-grid { grid-template-columns: 1fr; }
           .hero-content h1 { font-size: 2.5rem; }
           .hero-image { height: 400px; }
+          .hero-actions { flex-direction: column; }
+          .btn-hero-primary, .btn-whatsapp { width: 100%; justify-content: center; }
         }
       `}</style>
     </div>

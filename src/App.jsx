@@ -12,6 +12,8 @@ import Auth from './pages/Auth';
 import Profile from './pages/Profile';
 import Support from './pages/Support';
 import Checkout from './pages/Checkout';
+import Testimonials from './pages/Testimonials';
+import Policies from './pages/Policies';
 import CartDrawer from './components/CartDrawer';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -27,6 +29,8 @@ function App() {
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/consultation" element={<Consultation />} />
           <Route path="/about" element={<About />} />
+          <Route path="/testimonials" element={<Testimonials />} />
+          <Route path="/policies" element={<Policies />} />
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/auth" element={<Auth />} />
