@@ -109,7 +109,10 @@ const Navbar = () => {
               </Link>
             )}
             <button
-              onClick={() => setCartOpen(true)}
+              onClick={() => {
+                setCartOpen(true);
+                setMenuOpen(false);
+              }}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text)', position: 'relative', display: 'flex', alignItems: 'center' }}
               aria-label="Open cart"
             >

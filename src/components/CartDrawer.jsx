@@ -145,7 +145,7 @@ const CartDrawer = () => {
       <style>{`
         .cart-backdrop {
           position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-          backdrop-filter: blur(4px); z-index: 998;
+          backdrop-filter: blur(4px); z-index: 1010;
           opacity: 0; pointer-events: none;
           transition: opacity 0.3s ease;
         }
@@ -156,7 +156,7 @@ const CartDrawer = () => {
           width: 420px; max-width: 95vw;
           background: var(--color-bg);
           box-shadow: -8px 0 40px rgba(0,0,0,0.15);
-          z-index: 999; display: flex; flex-direction: column;
+          z-index: 1020; display: flex; flex-direction: column;
           transform: translateX(100%);
           transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
