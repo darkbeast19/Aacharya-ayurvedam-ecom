@@ -8,6 +8,7 @@ import Consultation from './pages/Consultation';
 import About from './pages/About';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminLogin from './pages/AdminLogin';
 import Auth from './pages/Auth';
 import Profile from './pages/Profile';
 import Support from './pages/Support';
@@ -16,6 +17,7 @@ import Testimonials from './pages/Testimonials';
 import Policies from './pages/Policies';
 import CartDrawer from './components/CartDrawer';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminRoute from './components/AdminRoute';
 
 function App() {
   return (
@@ -32,7 +34,8 @@ function App() {
           <Route path="/testimonials" element={<Testimonials />} />
           <Route path="/policies" element={<Policies />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/support" element={<Support />} />

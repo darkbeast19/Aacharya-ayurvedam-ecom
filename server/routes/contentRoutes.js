@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Content = require('../models/Content');
+const { protect, adminOnly } = require('../middleware/auth');
 
 // @desc    Get website content by section
 // @route   GET /api/content/:section
@@ -21,8 +22,7 @@ router.get('/:section', async (req, res) => {
 // @desc    Update website content
 // @route   PUT /api/content/:section
 // @access  Private/Admin
-router.put('/:section', async (req, res) => {
-  // In a real app we would check the JWT token to ensure user isAdmin here
+router.put('/:section', protect, adminOnly, async (req, res) => {
   try {
     let content = await Content.findOne({ section: req.params.section });
 

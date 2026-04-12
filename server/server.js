@@ -1,4 +1,4 @@
-yes do it const dns = require('dns');
+const dns = require('dns');
 dns.setDefaultResultOrder('ipv4first');
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
@@ -45,7 +45,7 @@ app.use('/api/content', require('./routes/contentRoutes'));
 const frontendDir = path.join(__dirname, '../dist');
 app.use(express.static(frontendDir));
 
-app.get('*', (req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(frontendDir, 'index.html'));
 });
 

@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getApiPath } from '../api';
-import { Save, CheckCircle, FileText, Settings, Package, ShoppingBag, MessageCircle, Truck, RotateCcw, XCircle, Shield } from 'lucide-react';
+import { Save, CheckCircle, FileText, Settings, Package, ShoppingBag, MessageCircle, Truck, RotateCcw, XCircle, Shield, LogOut } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const AdminDashboard = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('content');
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
@@ -74,7 +78,10 @@ const AdminDashboard = () => {
     try {
       const res = await fetch(getApiPath(`/api/content/${section}`), {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user?.token}`
+        },
         body: JSON.stringify({ data })
       });
       if (res.ok) {
@@ -149,19 +156,32 @@ const AdminDashboard = () => {
       <div className="admin-layout">
         {/* Sidebar */}
         <aside className="admin-sidebar">
-          {tabs.map((tab) => {
-            const TabIcon = tab.icon;
-            return (
-              <button
-                key={tab.key}
-                className={`admin-tab-btn ${activeTab === tab.key ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab.key)}
-              >
-                <TabIcon size={18} />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
+          <div className="admin-sidebar-menu">
+            {tabs.map((tab) => {
+              const TabIcon = tab.icon;
+              return (
+                <button
+                  key={tab.key}
+                  className={`admin-tab-btn ${activeTab === tab.key ? 'active' : ''}`}
+                  onClick={() => setActiveTab(tab.key)}
+                >
+                  <TabIcon size={18} />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+          
+          <button 
+            className="admin-logout-btn" 
+            onClick={() => {
+              logout();
+              navigate('/admin/login');
+            }}
+          >
+            <LogOut size={18} />
+            <span>Sign Out</span>
+          </button>
         </aside>
 
         {/* Content Area */}
@@ -382,9 +402,35 @@ const AdminDashboard = () => {
         .admin-sidebar {
           display: flex;
           flex-direction: column;
-          gap: 6px;
+          justify-content: space-between;
           position: sticky;
           top: 100px;
+          height: calc(100vh - 140px);
+        }
+        .admin-sidebar-menu {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+        .admin-logout-btn {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 12px 18px;
+          border: none;
+          background: transparent;
+          color: #ef4444;
+          font-weight: 500;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+          text-align: left;
+          font-family: var(--font-family);
+          border-radius: var(--radius-sm);
+          margin-top: 24px;
+        }
+        .admin-logout-btn:hover {
+          background: #fef2f2;
         }
         .admin-tab-btn {
           display: flex;
@@ -451,7 +497,17 @@ const AdminDashboard = () => {
             flex-direction: row;
             overflow-x: auto;
             gap: 6px;
+            height: auto;
           }
+          .admin-sidebar-menu {
+            flex-direction: row;
+            gap: 6px;
+          }
+          .admin-logout-btn {
+            margin-top: 0;
+            padding: 10px 14px;
+          }
+          .admin-logout-btn span { display: none; }
           .admin-tab-btn {
             white-space: nowrap;
             padding: 10px 14px;
