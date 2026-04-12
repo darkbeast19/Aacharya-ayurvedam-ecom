@@ -159,7 +159,7 @@ const ProductDetails = () => {
               </div>
               <div>
                 <h4>Estimated Delivery</h4>
-                <p>{extraInfo.estimatedDelivery}</p>
+                <p>{product.estimatedDelivery || extraInfo.estimatedDelivery}</p>
               </div>
             </div>
             <div className="extra-info-item">
@@ -168,7 +168,7 @@ const ProductDetails = () => {
               </div>
               <div>
                 <h4>Return & Exchange</h4>
-                <p>{extraInfo.returnExchange}</p>
+                <p>{product.returnExchangeInfo || extraInfo.returnExchange}</p>
               </div>
             </div>
             <div className="extra-info-item">
@@ -177,7 +177,7 @@ const ProductDetails = () => {
               </div>
               <div>
                 <h4>Cancellation & Refund</h4>
-                <p>{extraInfo.cancellationRefund}</p>
+                <p>{product.cancellationRefundInfo || extraInfo.cancellationRefund}</p>
               </div>
             </div>
             <div className="extra-info-item">
@@ -186,7 +186,7 @@ const ProductDetails = () => {
               </div>
               <div>
                 <h4>Quality Assurance</h4>
-                <p>{extraInfo.additionalInfo}</p>
+                <p>{product.additionalInfo || extraInfo.additionalInfo}</p>
               </div>
             </div>
           </div>

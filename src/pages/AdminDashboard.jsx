@@ -497,7 +497,10 @@ const AdminDashboard = () => {
                   <p className="text-muted text-sm">Add, edit, or remove store products.</p>
                 </div>
                 {!editingProduct && (
-                  <button className="btn btn-primary" onClick={() => setEditingProduct({ name: '', price: '', category: '', image: '', description: '', ingredients: '', dosha: '', countInStock: '' })}>
+                  <button className="btn btn-primary" onClick={() => setEditingProduct({ 
+                    name: '', price: '', category: '', image: '', description: '', ingredients: '', dosha: '', countInStock: '',
+                    estimatedDelivery: '', returnExchangeInfo: '', cancellationRefundInfo: '', additionalInfo: ''
+                  })}>
                     + Add New Product
                   </button>
                 )}
@@ -540,6 +543,29 @@ const AdminDashboard = () => {
                     <label>Full Description</label>
                     <textarea required className="input-field" rows="4" value={editingProduct.description} onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })} />
                   </div>
+
+                  <div style={{ marginTop: '24px', padding: '16px', background: 'rgba(0,0,0,0.02)', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.05)' }}>
+                    <h4 style={{ margin: '0 0 16px' }}><Settings size={16} style={{ display: 'inline', marginRight: '6px' }} />Custom Policy Overrides</h4>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '16px' }}>Leave these blank to use the default global Product Page Info.</p>
+                    
+                    <div className="input-group">
+                      <label>Custom Estimated Delivery</label>
+                      <input className="input-field" type="text" value={editingProduct.estimatedDelivery || ''} onChange={(e) => setEditingProduct({ ...editingProduct, estimatedDelivery: e.target.value })} placeholder="e.g. 1-2 express delivery" />
+                    </div>
+                    <div className="input-group">
+                      <label>Custom Return & Exchange Info</label>
+                      <input className="input-field" type="text" value={editingProduct.returnExchangeInfo || ''} onChange={(e) => setEditingProduct({ ...editingProduct, returnExchangeInfo: e.target.value })} placeholder="e.g. No returns for this item" />
+                    </div>
+                    <div className="input-group">
+                      <label>Custom Cancellation & Refund Info</label>
+                      <input className="input-field" type="text" value={editingProduct.cancellationRefundInfo || ''} onChange={(e) => setEditingProduct({ ...editingProduct, cancellationRefundInfo: e.target.value })} />
+                    </div>
+                    <div className="input-group">
+                      <label>Custom Additional Info</label>
+                      <input className="input-field" type="text" value={editingProduct.additionalInfo || ''} onChange={(e) => setEditingProduct({ ...editingProduct, additionalInfo: e.target.value })} />
+                    </div>
+                  </div>
+
                   <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
                     <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : 'Save Product'}</button>
                     <button type="button" className="btn btn-outline" onClick={() => setEditingProduct(null)}>Cancel</button>

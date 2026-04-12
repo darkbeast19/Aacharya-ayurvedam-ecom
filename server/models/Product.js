@@ -34,6 +34,18 @@ const productSchema = mongoose.Schema(
     dosha: {
       type: String,
     },
+    estimatedDelivery: {
+      type: String,
+    },
+    returnExchangeInfo: {
+      type: String,
+    },
+    cancellationRefundInfo: {
+      type: String,
+    },
+    additionalInfo: {
+      type: String,
+    },
   },
   {
     timestamps: true,

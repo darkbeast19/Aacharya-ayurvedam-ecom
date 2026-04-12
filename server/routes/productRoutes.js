@@ -46,6 +46,10 @@ router.post('/', protect, adminOnly, async (req, res) => {
       description: req.body.description || 'Sample description',
       ingredients: req.body.ingredients || '',
       dosha: req.body.dosha || '',
+      estimatedDelivery: req.body.estimatedDelivery || '',
+      returnExchangeInfo: req.body.returnExchangeInfo || '',
+      cancellationRefundInfo: req.body.cancellationRefundInfo || '',
+      additionalInfo: req.body.additionalInfo || '',
     });
 
     const createdProduct = await product.save();
@@ -59,7 +63,10 @@ router.post('/', protect, adminOnly, async (req, res) => {
 // @route   PUT /api/products/:id
 // @access  Private/Admin
 router.put('/:id', protect, adminOnly, async (req, res) => {
-  const { name, price, description, image, category, countInStock, ingredients, dosha } = req.body;
+  const { 
+    name, price, description, image, category, countInStock, ingredients, dosha,
+    estimatedDelivery, returnExchangeInfo, cancellationRefundInfo, additionalInfo 
+  } = req.body;
 
   try {
     const product = await Product.findById(req.params.id);
@@ -73,6 +80,10 @@ router.put('/:id', protect, adminOnly, async (req, res) => {
       product.countInStock = countInStock;
       product.ingredients = ingredients;
       product.dosha = dosha;
+      if (estimatedDelivery !== undefined) product.estimatedDelivery = estimatedDelivery;
+      if (returnExchangeInfo !== undefined) product.returnExchangeInfo = returnExchangeInfo;
+      if (cancellationRefundInfo !== undefined) product.cancellationRefundInfo = cancellationRefundInfo;
+      if (additionalInfo !== undefined) product.additionalInfo = additionalInfo;
 
       const updatedProduct = await product.save();
       res.json(updatedProduct);
