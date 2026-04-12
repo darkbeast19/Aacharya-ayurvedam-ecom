@@ -16,6 +16,10 @@ const AdminDashboard = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
 
+  // Orders
+  const [orders, setOrders] = useState([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+
   // Website Content
   const [homepageText, setHomepageText] = useState('Reclaim Your Balance. Rooted in 5,000 years of Ayurvedic tradition.');
   const [aboutText, setAboutText] = useState('We believe in natural healing.');
@@ -85,8 +89,27 @@ const AdminDashboard = () => {
     setIsLoadingProducts(false);
   };
 
+  const fetchOrders = async () => {
+    setIsLoadingOrders(true);
+    try {
+      const res = await fetch(getApiPath('/api/orders'), {
+        headers: { Authorization: `Bearer ${user?.token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setOrders(data);
+      } else {
+        showMessage('❌ Failed to fetch orders.');
+      }
+    } catch {
+      showMessage('❌ Network error fetching orders');
+    }
+    setIsLoadingOrders(false);
+  };
+
   useEffect(() => {
     if (activeTab === 'products') fetchProducts();
+    if (activeTab === 'orders') fetchOrders();
   }, [activeTab]);
 
   const showMessage = (msg) => {
@@ -159,6 +182,27 @@ const AdminDashboard = () => {
         fetchProducts();
       } else {
         showMessage('❌ Failed to delete.');
+      }
+    } catch {
+      showMessage('❌ Network error.');
+    }
+  };
+
+  const handleUpdateOrderStatus = async (id, status) => {
+    try {
+      const res = await fetch(getApiPath(`/api/orders/${id}/status`), {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user?.token}`
+        },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        showMessage(`✅ Order marked as ${status}`);
+        fetchOrders();
+      } else {
+        showMessage('❌ Failed to update order status');
       }
     } catch {
       showMessage('❌ Network error.');
@@ -534,8 +578,86 @@ const AdminDashboard = () => {
           {/* Orders Tab */}
           {activeTab === 'orders' && (
             <div>
-              <h2>Customer Orders</h2>
-              <p className="text-muted">Order tracking and status updates will appear here.</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <div>
+                  <h2 style={{ margin: 0 }}><ShoppingBag size={20} style={{ display: 'inline', marginRight: '8px' }} />Customer Orders</h2>
+                  <p className="text-muted text-sm">View and update customer orders.</p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {isLoadingOrders ? (
+                  <p>Loading orders...</p>
+                ) : orders.length > 0 ? (
+                  orders.map(order => {
+                    const statusColors = {
+                      Pending: { bg: '#fff3cd', color: '#856404' },
+                      Confirmed: { bg: '#cce5ff', color: '#004085' },
+                      Shipped: { bg: '#d1ecf1', color: '#0c5460' },
+                      Delivered: { bg: '#d4edda', color: '#155724' },
+                      Cancelled: { bg: '#f8d7da', color: '#721c24' },
+                    };
+                    const sc = statusColors[order.status] || statusColors.Pending;
+                    
+                    return (
+                      <div key={order._id} style={{ padding: '20px', background: 'var(--color-surface)', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.05)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '16px', marginBottom: '16px' }}>
+                          <div>
+                            <p style={{ fontWeight: 'bold', fontSize: '1.05rem', margin: '0 0 4px' }}>Order #{order._id.slice(-8).toUpperCase()}</p>
+                            <p style={{ margin: '0 0 4px', fontSize: '0.9rem' }}>Date: {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                            <p style={{ margin: '0', fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Customer: <strong>{order.customerName}</strong> ({order.customerEmail})</p>
+                            <p style={{ margin: '4px 0 0', fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Phone: {order.customerPhone}</p>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <p style={{ fontWeight: 800, fontSize: '1.2rem', margin: '0 0 8px', color: 'var(--color-primary)' }}>₹{order.totalPrice}</p>
+                            <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold', background: sc.bg, color: sc.color, marginBottom: '10px' }}>
+                              {order.status}
+                            </span>
+                            <div>
+                              <select 
+                                value={order.status} 
+                                onChange={(e) => handleUpdateOrderStatus(order._id, e.target.value)}
+                                style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem' }}
+                              >
+                                {Object.keys(statusColors).map(statusName => (
+                                  <option key={statusName} value={statusName}>{statusName}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <p style={{ margin: '0 0 8px', fontSize: '0.9rem', fontWeight: 600 }}>Shipping Details:</p>
+                          <p style={{ margin: '0 0 16px', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                            {order.shippingAddress.address}, {order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.postalCode}
+                          </p>
+                          
+                          <p style={{ margin: '0 0 8px', fontSize: '0.9rem', fontWeight: 600 }}>Order Items:</p>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {order.orderItems.map((item, idx) => (
+                              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.85rem' }}>
+                                <img src={item.image} alt={item.name} style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover' }} />
+                                <div style={{ flex: 1 }}>
+                                  <p style={{ margin: 0, fontWeight: 500 }}>{item.name}</p>
+                                  <p style={{ margin: 0, color: 'var(--color-text-muted)' }}>Qty: {item.qty} x ₹{item.price}</p>
+                                </div>
+                                <p style={{ margin: 0, fontWeight: 600 }}>₹{item.qty * item.price}</p>
+                              </div>
+                            ))}
+                          </div>
+                          <div style={{ borderTop: '1px dashed rgba(0,0,0,0.1)', marginTop: '12px', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                            <span>Payment Method: {order.paymentMethod}</span>
+                            <span>Payment Result: {order.paymentResult?.status || 'N/A'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="text-muted">No orders found.</p>
+                )}
+              </div>
             </div>
           )}
         </main>
