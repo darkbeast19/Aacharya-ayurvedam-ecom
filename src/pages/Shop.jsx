@@ -91,7 +91,7 @@ const Shop = () => {
                       <h4>{product.name}</h4>
                     </Link>
                     {renderStars()}
-                    <p className="product-price">${Number(product.price).toFixed(2)}</p>
+                    <p className="product-price">₹{Number(product.price).toFixed(2)}</p>
                     <div className="card-actions">
                       <button
                         className="btn btn-primary full-width mt-4"

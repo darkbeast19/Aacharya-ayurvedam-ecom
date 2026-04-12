@@ -140,7 +140,7 @@ const Home = () => {
                   <div className="product-info">
                     <span className="product-category">{product.category}</span>
                     <h4>{product.name}</h4>
-                    <p className="product-price">${Number(product.price).toFixed(2)}</p>
+                    <p className="product-price">₹{Number(product.price).toFixed(2)}</p>
                     <Link to={`/product/${product._id}`} className="btn btn-outline full-width mt-4">View Details</Link>
                   </div>
                 </div>

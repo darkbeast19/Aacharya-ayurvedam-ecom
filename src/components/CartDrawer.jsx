@@ -53,7 +53,7 @@ const CartDrawer = () => {
                     <div className="cart-item-details">
                       <p className="cart-item-category">{item.category}</p>
                       <h4 className="cart-item-name">{item.name}</h4>
-                      <p className="cart-item-price">${Number(item.price).toFixed(2)}</p>
+                      <p className="cart-item-price">₹{Number(item.price).toFixed(2)}</p>
 
                       {/* Quantity Controls */}
                       <div className="quantity-controls">
@@ -82,7 +82,7 @@ const CartDrawer = () => {
                       </div>
                     </div>
                     <div className="cart-item-subtotal">
-                      ${(Number(item.price) * item.quantity).toFixed(2)}
+                      ₹{(Number(item.price) * item.quantity).toFixed(2)}
                     </div>
                   </div>
                 );
@@ -93,7 +93,7 @@ const CartDrawer = () => {
             <div className="cart-footer">
               <div className="cart-total-row">
                 <span>Subtotal</span>
-                <strong>${cartTotal.toFixed(2)}</strong>
+                <strong>₹{cartTotal.toFixed(2)}</strong>
               </div>
               <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '16px' }}>
                 Shipping & taxes calculated at checkout
