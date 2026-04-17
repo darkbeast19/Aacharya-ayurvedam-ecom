@@ -1,8 +1,29 @@
 import { Mail, Phone, MapPin, MessageCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getApiPath } from '../api';
 
 const Support = () => {
     const [status, setStatus] = useState('');
+    const [supportInfo, setSupportInfo] = useState({
+        phone: '+91 98765 43210',
+        email: 'support@aacharyaayurvedam.com',
+        address: '123, Vedic Marg, Sector 4\nNear Dhanvantari Park\nNew Delhi, 110001'
+    });
+
+    useEffect(() => {
+        fetch(getApiPath('/api/content/settings'))
+            .then(res => res.json())
+            .then(data => {
+                if (data) {
+                    setSupportInfo(prev => ({
+                        phone: data.supportPhone || prev.phone,
+                        email: data.supportEmail || prev.email,
+                        address: data.supportAddress || prev.address
+                    }));
+                }
+            })
+            .catch(() => {});
+    }, []);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -31,7 +52,7 @@ const Support = () => {
                                     </div>
                                     <div>
                                         <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px' }}>Call Us</h3>
-                                        <p className="text-muted">+91 98765 43210</p>
+                                        <p className="text-muted">{supportInfo.phone}</p>
                                         <p className="text-muted" style={{ fontSize: '13px', marginTop: '4px' }}>Mon-Sat 9:00 AM to 6:00 PM</p>
                                     </div>
                                 </div>
@@ -42,7 +63,7 @@ const Support = () => {
                                     </div>
                                     <div>
                                         <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px' }}>Email Us</h3>
-                                        <p className="text-muted">support@aacharyaayurvedam.com</p>
+                                        <p className="text-muted">{supportInfo.email}</p>
                                     </div>
                                 </div>
 
@@ -52,10 +73,8 @@ const Support = () => {
                                     </div>
                                     <div>
                                         <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px' }}>Visit Our Clinic</h3>
-                                        <p className="text-muted" style={{ lineHeight: '1.5' }}>
-                                            123, Vedic Marg, Sector 4<br />
-                                            Near Dhanvantari Park<br />
-                                            New Delhi, 110001
+                                        <p className="text-muted" style={{ lineHeight: '1.5', whiteSpace: 'pre-line' }}>
+                                            {supportInfo.address}
                                         </p>
                                     </div>
                                 </div>

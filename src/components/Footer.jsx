@@ -1,12 +1,27 @@
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { getApiPath } from '../api';
 
 const Footer = () => {
+  const [footerText, setFooterText] = useState("Awakening the body's innate wisdom through ancient science and pure botanical remedies.");
+
+  useEffect(() => {
+    fetch(getApiPath('/api/content/settings'))
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.footerText) {
+                setFooterText(data.footerText);
+            }
+        })
+        .catch(() => {});
+  }, []);
+
   return (
     <footer className="footer">
       <div className="container footer-grid">
         <div className="footer-brand">
           <h2>Aacharya ayurvedam</h2>
-          <p className="text-muted">Awakening the body's innate wisdom through ancient science and pure botanical remedies.</p>
+          <p className="text-muted">{footerText}</p>
         </div>
         
         <div className="footer-links-group">

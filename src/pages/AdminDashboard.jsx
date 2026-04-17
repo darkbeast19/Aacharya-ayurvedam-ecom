@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getApiPath } from '../api';
-import { Save, CheckCircle, FileText, Settings, Package, ShoppingBag, MessageCircle, Truck, RotateCcw, XCircle, Shield, LogOut } from 'lucide-react';
+import { Save, CheckCircle, FileText, Settings, Package, ShoppingBag, MessageCircle, Truck, RotateCcw, XCircle, Shield, LogOut, Calendar } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const AdminDashboard = () => {
@@ -39,6 +39,16 @@ const AdminDashboard = () => {
   // WhatsApp Settings
   const [whatsappNumber, setWhatsappNumber] = useState('919999999999');
 
+  // Support & Footer Info Settings
+  const [supportPhone, setSupportPhone] = useState('+91 98765 43210');
+  const [supportEmail, setSupportEmail] = useState('support@aacharyaayurvedam.com');
+  const [supportAddress, setSupportAddress] = useState('123, Vedic Marg, Sector 4\nNear Dhanvantari Park\nNew Delhi, 110001');
+  const [footerText, setFooterText] = useState('Awakening the body\'s innate wisdom through ancient science and pure botanical remedies.');
+
+  // Consultations
+  const [consultations, setConsultations] = useState([]);
+  const [isLoadingConsultations, setIsLoadingConsultations] = useState(false);
+
   // Load existing content
   useEffect(() => {
     // Homepage content
@@ -74,6 +84,10 @@ const AdminDashboard = () => {
       .then(res => res.json())
       .then(data => {
         if (data?.whatsappNumber) setWhatsappNumber(data.whatsappNumber);
+        if (data?.supportPhone) setSupportPhone(data.supportPhone);
+        if (data?.supportEmail) setSupportEmail(data.supportEmail);
+        if (data?.supportAddress) setSupportAddress(data.supportAddress);
+        if (data?.footerText) setFooterText(data.footerText);
       }).catch(() => {});
   }, []);
 
@@ -107,9 +121,28 @@ const AdminDashboard = () => {
     setIsLoadingOrders(false);
   };
 
+  const fetchConsultations = async () => {
+    setIsLoadingConsultations(true);
+    try {
+      const res = await fetch(getApiPath('/api/consultations'), {
+        headers: { Authorization: `Bearer ${user?.token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setConsultations(data);
+      } else {
+        showMessage('❌ Failed to fetch consultations.');
+      }
+    } catch {
+      showMessage('❌ Network error fetching consultations');
+    }
+    setIsLoadingConsultations(false);
+  };
+
   useEffect(() => {
     if (activeTab === 'products') fetchProducts();
     if (activeTab === 'orders') fetchOrders();
+    if (activeTab === 'consultations') fetchConsultations();
   }, [activeTab]);
 
   const showMessage = (msg) => {
@@ -209,6 +242,27 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleUpdateConsultationStatus = async (id, status) => {
+    try {
+      const res = await fetch(getApiPath(`/api/consultations/${id}/status`), {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user?.token}`
+        },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        showMessage(`✅ Consultation marked as ${status}`);
+        fetchConsultations();
+      } else {
+        showMessage('❌ Failed to update consultation status');
+      }
+    } catch {
+      showMessage('❌ Network error.');
+    }
+  };
+
   const handleSaveContent = () => {
     saveSection('homepage', { headline: homepageText, about: aboutText });
   };
@@ -232,7 +286,13 @@ const AdminDashboard = () => {
   };
 
   const handleSaveSettings = () => {
-    saveSection('settings', { whatsappNumber });
+    saveSection('settings', { 
+      whatsappNumber, 
+      supportPhone, 
+      supportEmail, 
+      supportAddress, 
+      footerText 
+    });
   };
 
   const tabs = [
@@ -482,6 +542,53 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
+              <div className="settings-card" style={{ marginTop: '24px' }}>
+                <div className="settings-card-header">
+                  <Settings size={20} style={{ color: 'var(--color-primary)' }} />
+                  <h3>Support & Footer Information</h3>
+                </div>
+                <div className="input-group">
+                  <label>Support Phone Number</label>
+                  <input 
+                    type="text"
+                    className="input-field" 
+                    value={supportPhone}
+                    onChange={(e) => setSupportPhone(e.target.value)}
+                    placeholder="+91 98765 43210"
+                  />
+                </div>
+                <div className="input-group">
+                  <label>Support Email Address</label>
+                  <input 
+                    type="email"
+                    className="input-field" 
+                    value={supportEmail}
+                    onChange={(e) => setSupportEmail(e.target.value)}
+                    placeholder="support@example.com"
+                  />
+                </div>
+                <div className="input-group">
+                  <label>Clinic/Store Address</label>
+                  <textarea 
+                    className="input-field" 
+                    rows="3"
+                    value={supportAddress}
+                    onChange={(e) => setSupportAddress(e.target.value)}
+                    placeholder="123 Street Name..."
+                  />
+                </div>
+                <div className="input-group">
+                  <label>Footer Description Text</label>
+                  <textarea 
+                    className="input-field" 
+                    rows="2"
+                    value={footerText}
+                    onChange={(e) => setFooterText(e.target.value)}
+                    placeholder="Awakening the body's innate wisdom..."
+                  />
+                </div>
+              </div>
+
               <button className="btn btn-primary" style={{ marginTop: '24px' }} onClick={handleSaveSettings} disabled={saving}>
                 <Save size={16} /> {saving ? 'Saving...' : 'Save Settings'}
               </button>
@@ -682,6 +789,67 @@ const AdminDashboard = () => {
                   })
                 ) : (
                   <p className="text-muted">No orders found.</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Consultations Tab */}
+          {activeTab === 'consultations' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <div>
+                  <h2 style={{ margin: 0 }}><Calendar size={20} style={{ display: 'inline', marginRight: '8px' }} />Consultations</h2>
+                  <p className="text-muted text-sm">View and manage consultation booking requests.</p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {isLoadingConsultations ? (
+                  <p>Loading consultations...</p>
+                ) : consultations.length > 0 ? (
+                  consultations.map(consultation => {
+                    const statusColors = {
+                      Pending: { bg: '#fff3cd', color: '#856404' },
+                      Confirmed: { bg: '#cce5ff', color: '#004085' },
+                      Completed: { bg: '#d4edda', color: '#155724' },
+                      Cancelled: { bg: '#f8d7da', color: '#721c24' },
+                    };
+                    const sc = statusColors[consultation.status] || statusColors.Pending;
+                    
+                    return (
+                      <div key={consultation._id} style={{ padding: '20px', background: 'var(--color-surface)', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.05)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+                          <div>
+                            <h4 style={{ margin: '0 0 8px', fontSize: '1.1rem' }}>{consultation.name}</h4>
+                            <p style={{ margin: '0 0 4px', fontSize: '0.9rem' }}>Email: <a href={`mailto:${consultation.email}`} style={{ color: 'var(--color-primary)' }}>{consultation.email}</a></p>
+                            <p style={{ margin: '0 0 4px', fontSize: '0.9rem' }}>Concern: <strong>{consultation.concern}</strong></p>
+                            <p style={{ margin: '0 0 4px', fontSize: '0.9rem' }}>Requested Date: <strong>{new Date(consultation.preferredDate).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</strong></p>
+                            <p style={{ margin: '8px 0 0', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Created At: {new Date(consultation.createdAt).toLocaleString('en-US')}</p>
+                          </div>
+                          <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                            <span style={{ display: 'inline-block', padding: '6px 16px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold', background: sc.bg, color: sc.color }}>
+                              {consultation.status}
+                            </span>
+                            <div style={{ marginTop: '8px' }}>
+                              <label style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginRight: '8px' }}>Update Status:</label>
+                              <select 
+                                value={consultation.status} 
+                                onChange={(e) => handleUpdateConsultationStatus(consultation._id, e.target.value)}
+                                style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem', cursor: 'pointer' }}
+                              >
+                                {Object.keys(statusColors).map(statusName => (
+                                  <option key={statusName} value={statusName}>{statusName}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="text-muted">No consultation requests found.</p>
                 )}
               </div>
             </div>

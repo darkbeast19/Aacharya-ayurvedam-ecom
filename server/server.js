@@ -40,6 +40,7 @@ app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/content', require('./routes/contentRoutes'));
+app.use('/api/consultations', require('./routes/consultationRoutes'));
 
 // Serve frontend
 const frontendDir = path.join(__dirname, '../dist');

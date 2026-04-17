@@ -1,6 +1,29 @@
-import { Calendar } from 'lucide-react';
+import { Calendar, CheckCircle } from 'lucide-react';
+import { useState } from 'react';
+import { getApiPath } from '../api';
 
 const Consultation = () => {
+  const [formData, setFormData] = useState({ name: '', email: '', concern: '', preferredDate: '' });
+  const [status, setStatus] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(getApiPath('/api/consultations'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      if (res.ok) {
+        setStatus('✅ Appointment requested successfully. We will email you to confirm the time.');
+        setFormData({ name: '', email: '', concern: '', preferredDate: '' });
+      } else {
+        setStatus('❌ Failed to request appointment. Please try again.');
+      }
+    } catch {
+      setStatus('❌ Network error. Check your connection.');
+    }
+  };
   return (
     <div className="consultation-page fade-in">
       <div className="consult-hero">
@@ -25,18 +48,23 @@ const Consultation = () => {
         
         <div className="consult-form bg-surface p-8">
           <h3>Request an Appointment</h3>
-          <form className="mt-6">
+          {status && (
+            <div style={{ padding: '12px', background: status.includes('✅') ? '#d4edda' : '#f8d7da', color: status.includes('✅') ? '#155724' : '#721c24', borderRadius: '8px', marginTop: '16px', marginBottom: '8px', fontSize: '0.9rem' }}>
+              {status}
+            </div>
+          )}
+          <form className="mt-6" onSubmit={handleSubmit}>
             <div className="input-group">
               <label>Full Name</label>
-              <input type="text" className="input-field" placeholder="E.g. Maya Sharma" required />
+              <input type="text" className="input-field" placeholder="E.g. Maya Sharma" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} />
             </div>
             <div className="input-group">
               <label>Email Address</label>
-              <input type="email" className="input-field" placeholder="maya@example.com" required />
+              <input type="email" className="input-field" placeholder="maya@example.com" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} />
             </div>
             <div className="input-group">
               <label>Primary Health Concern</label>
-              <select className="input-field" required>
+              <select className="input-field" required value={formData.concern} onChange={(e) => setFormData({...formData, concern: e.target.value})}>
                 <option value="">Select an area</option>
                 <option value="digestion">Digestive Health</option>
                 <option value="stress">Stress & Anxiety</option>
@@ -47,7 +75,7 @@ const Consultation = () => {
             </div>
             <div className="input-group">
               <label>Preferred Date</label>
-              <input type="date" className="input-field" required />
+              <input type="date" className="input-field" required value={formData.preferredDate} onChange={(e) => setFormData({...formData, preferredDate: e.target.value})} />
             </div>
             <button className="btn btn-primary full-width mt-4" type="submit">
               <Calendar size={18} /> Schedule Consultation
