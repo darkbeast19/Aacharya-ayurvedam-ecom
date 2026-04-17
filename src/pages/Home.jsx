@@ -1,13 +1,21 @@
 import { useState, useEffect } from 'react';
 import { doshas } from '../data/products';
-import { ArrowRight, Leaf, ShieldCheck, HeartPulse, Loader, MessageCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ArrowRight, Leaf, ShieldCheck, HeartPulse, Loader, MessageCircle, ShoppingBag, CreditCard } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 import { getApiPath } from '../api';
 
 const WHATSAPP_DEFAULT = '919999999999';
 
 const Home = () => {
   const [headline, setHeadline] = useState('Balance Your Mind, Body & Spirit naturally.');
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
+
+  const handleBuyNow = (product) => {
+    addToCart(product);
+    navigate('/checkout');
+  };
   const [aboutText, setAboutText] = useState('Discover authentic Ayurvedic formulations tailored to your unique dosha. Sourced from organic herbs, designed for modern life.');
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -139,9 +147,28 @@ const Home = () => {
                   </div>
                   <div className="product-info">
                     <span className="product-category">{product.category}</span>
-                    <h4>{product.name}</h4>
+                    <Link to={`/product/${product._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                      <h4 style={{ transition: 'color var(--transition-fast)' }} onMouseOver={(e) => e.target.style.color = 'var(--color-primary-light)'} onMouseOut={(e) => e.target.style.color = 'inherit'}>
+                        {product.name}
+                      </h4>
+                    </Link>
                     <p className="product-price">₹{Number(product.price).toFixed(2)}</p>
-                    <Link to={`/product/${product._id}`} className="btn btn-outline full-width mt-4">View Details</Link>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '16px' }}>
+                      <button 
+                        className="btn btn-outline" 
+                        onClick={() => addToCart(product)}
+                        style={{ padding: '8px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                      >
+                        <ShoppingBag size={14} /> Add to Cart
+                      </button>
+                      <button 
+                        className="btn btn-primary" 
+                        onClick={() => handleBuyNow(product)}
+                        style={{ padding: '8px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                      >
+                        <CreditCard size={14} /> Buy Now
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}

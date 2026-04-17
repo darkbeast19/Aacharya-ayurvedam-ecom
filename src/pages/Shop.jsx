@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Star, ShoppingBag, Loader } from 'lucide-react';
+import { Star, ShoppingBag, Loader, CreditCard } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useNavigate } from 'react-router-dom';
 import { getApiPath } from '../api';
 
 const Shop = () => {
@@ -10,6 +11,12 @@ const Shop = () => {
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('All');
   const { addToCart } = useCart();
+  const navigate = useNavigate();
+
+  const handleBuyNow = (product) => {
+    addToCart(product);
+    navigate('/checkout');
+  };
 
   const categories = ['All', 'Stress Relief', 'Digestive Health', 'Hair Care', 'Immunity'];
 
@@ -92,12 +99,20 @@ const Shop = () => {
                     </Link>
                     {renderStars()}
                     <p className="product-price">₹{Number(product.price).toFixed(2)}</p>
-                    <div className="card-actions">
-                      <button
-                        className="btn btn-primary full-width mt-4"
+                    <div className="card-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <button 
+                        className="btn btn-outline" 
                         onClick={() => addToCart(product)}
+                        style={{ padding: '8px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
                       >
-                        <ShoppingBag size={18} /> Add to Cart
+                        <ShoppingBag size={14} /> Add
+                      </button>
+                      <button 
+                        className="btn btn-primary" 
+                        onClick={() => handleBuyNow(product)}
+                        style={{ padding: '8px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+                      >
+                        <CreditCard size={14} /> Buy
                       </button>
                     </div>
                   </div>
