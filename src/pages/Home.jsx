@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { doshas } from '../data/products';
 import { ArrowRight, Leaf, ShieldCheck, HeartPulse, Loader, MessageCircle, ShoppingBag, CreditCard } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
@@ -21,12 +20,21 @@ const Home = () => {
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [whatsappNumber, setWhatsappNumber] = useState(WHATSAPP_DEFAULT);
 
+  const [showDoshaSection, setShowDoshaSection] = useState(true);
+  const [doshaCards, setDoshaCards] = useState([
+    { name: 'Vata', focus: 'Movement, Energy, Nervous System', description: 'Air and Space elements. Shop grounding and warming formulations.', image: '' },
+    { name: 'Pitta', focus: 'Digestion, Metabolism, Skin', description: 'Fire and Water elements. Shop cooling and soothing formulations.', image: '' },
+    { name: 'Kapha', focus: 'Structure, Immunity, Lubrication', description: 'Earth and Water elements. Shop stimulating and lighter formulations.', image: '' }
+  ]);
+
   useEffect(() => {
     fetch(getApiPath('/api/content/homepage'))
       .then(res => res.json())
       .then(data => {
         if (data.headline) setHeadline(data.headline);
         if (data.about) setAboutText(data.about);
+        if (data.showDoshaSection !== undefined) setShowDoshaSection(data.showDoshaSection);
+        if (data.doshaCards) setDoshaCards(data.doshaCards);
       })
       .catch(err => console.log('Using default content', err));
 
@@ -108,25 +116,28 @@ const Home = () => {
       </section>
 
       {/* Shop By Dosha */}
-      <section className="dosha-section">
-        <div className="container">
-          <div className="section-header text-center">
-            <h2>Shop by Dosha</h2>
-            <p>Ayurveda recognizes three main body types or 'Doshas'. Find formulations that balance yours.</p>
+      {showDoshaSection && (
+        <section className="dosha-section">
+          <div className="container">
+            <div className="section-header text-center">
+              <h2>Shop by Dosha</h2>
+              <p>Ayurveda recognizes three main body types or 'Doshas'. Find formulations that balance yours.</p>
+            </div>
+            
+            <div className="dosha-cards" style={{ display: 'grid', gridTemplateColumns: doshaCards.length > 0 ? `repeat(auto-fit, minmax(300px, 1fr))` : 'none', gap: '24px' }}>
+              {doshaCards.map((dosha, index) => (
+                <div key={index} className="dosha-card">
+                  {dosha.image && <img src={dosha.image} alt={dosha.name} style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '12px', marginBottom: '16px' }} />}
+                  <h3>{dosha.name}</h3>
+                  <span className="dosha-focus">{dosha.focus}</span>
+                  <p>{dosha.description}</p>
+                  <Link to="/shop" className="btn btn-outline dosha-btn">Shop {dosha.name}</Link>
+                </div>
+              ))}
+            </div>
           </div>
-          
-          <div className="dosha-cards">
-            {doshas.map((dosha, index) => (
-              <div key={index} className="dosha-card">
-                <h3>{dosha.name}</h3>
-                <span className="dosha-focus">{dosha.focus}</span>
-                <p>{dosha.description}</p>
-                <Link to="/shop" className="btn btn-outline dosha-btn">Shop {dosha.name}</Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Featured Products */}
       <section className="featured-section bg-surface">

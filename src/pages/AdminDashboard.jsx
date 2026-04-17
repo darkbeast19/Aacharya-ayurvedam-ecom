@@ -23,6 +23,12 @@ const AdminDashboard = () => {
   // Website Content
   const [homepageText, setHomepageText] = useState('Reclaim Your Balance. Rooted in 5,000 years of Ayurvedic tradition.');
   const [aboutText, setAboutText] = useState('We believe in natural healing.');
+  const [showDoshaSection, setShowDoshaSection] = useState(true);
+  const [doshaCards, setDoshaCards] = useState([
+    { name: 'Vata', focus: 'Movement, Energy, Nervous System', description: 'Air and Space elements. Shop grounding and warming formulations.', image: '' },
+    { name: 'Pitta', focus: 'Digestion, Metabolism, Skin', description: 'Fire and Water elements. Shop cooling and soothing formulations.', image: '' },
+    { name: 'Kapha', focus: 'Structure, Immunity, Lubrication', description: 'Earth and Water elements. Shop stimulating and lighter formulations.', image: '' }
+  ]);
 
   // Policies
   const [cancellationPolicy, setCancellationPolicy] = useState('');
@@ -57,6 +63,8 @@ const AdminDashboard = () => {
       .then(data => {
         if (data?.headline) setHomepageText(data.headline);
         if (data?.about) setAboutText(data.about);
+        if (data?.showDoshaSection !== undefined) setShowDoshaSection(data.showDoshaSection);
+        if (data?.doshaCards) setDoshaCards(data.doshaCards);
       }).catch(() => {});
 
     // Policies
@@ -264,7 +272,7 @@ const AdminDashboard = () => {
   };
 
   const handleSaveContent = () => {
-    saveSection('homepage', { headline: homepageText, about: aboutText });
+    saveSection('homepage', { headline: homepageText, about: aboutText, showDoshaSection, doshaCards });
   };
 
   const handleSavePolicies = () => {
@@ -395,7 +403,53 @@ const AdminDashboard = () => {
                 />
               </div>
 
-              <button className="btn btn-primary" onClick={handleSaveContent} disabled={saving}>
+              <hr style={{ margin: '32px 0', borderColor: 'rgba(0,0,0,0.05)' }} />
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2><FileText size={20} style={{ display: 'inline', marginRight: '8px' }} />Shop by Dosha Section</h2>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={showDoshaSection} onChange={(e) => setShowDoshaSection(e.target.checked)} style={{ width: '18px', height: '18px' }} />
+                  <strong>Show this section on Homepage</strong>
+                </label>
+              </div>
+
+              {showDoshaSection && (
+                <div style={{ marginTop: '20px' }}>
+                  {doshaCards.map((dosha, index) => (
+                    <div key={index} style={{ padding: '20px', background: 'var(--color-surface)', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.05)', marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                        <h3 style={{ margin: 0 }}>Dosha Card {index + 1}</h3>
+                        <button className="btn btn-outline" style={{ padding: '6px 12px', color: '#e53e3e', borderColor: '#e53e3e' }} onClick={() => setDoshaCards(doshaCards.filter((_, i) => i !== index))}>
+                          Remove
+                        </button>
+                      </div>
+                      <div className="form-row">
+                        <div className="input-group">
+                          <label>Name</label>
+                          <input type="text" className="input-field" value={dosha.name} onChange={(e) => { const newArr = [...doshaCards]; newArr[index].name = e.target.value; setDoshaCards(newArr); }} />
+                        </div>
+                        <div className="input-group">
+                          <label>Focus (Sub-text)</label>
+                          <input type="text" className="input-field" value={dosha.focus} onChange={(e) => { const newArr = [...doshaCards]; newArr[index].focus = e.target.value; setDoshaCards(newArr); }} />
+                        </div>
+                      </div>
+                      <div className="input-group">
+                        <label>Description</label>
+                        <textarea className="input-field" rows="2" value={dosha.description} onChange={(e) => { const newArr = [...doshaCards]; newArr[index].description = e.target.value; setDoshaCards(newArr); }} />
+                      </div>
+                      <div className="input-group">
+                        <label>Image URL (Optional)</label>
+                        <input type="text" className="input-field" placeholder="https://example.com/image.jpg" value={dosha.image || ''} onChange={(e) => { const newArr = [...doshaCards]; newArr[index].image = e.target.value; setDoshaCards(newArr); }} />
+                      </div>
+                    </div>
+                  ))}
+                  <button className="btn btn-outline" onClick={() => setDoshaCards([...doshaCards, { name: 'New Dosha', focus: '', description: '', image: '' }])} style={{ width: '100%', padding: '12px', borderStyle: 'dashed' }}>
+                    + Add Another Dosha Card
+                  </button>
+                </div>
+              )}
+
+              <button className="btn btn-primary" onClick={handleSaveContent} disabled={saving} style={{ marginTop: '32px' }}>
                 <Save size={16} /> {saving ? 'Saving...' : 'Save Content'}
               </button>
             </div>
