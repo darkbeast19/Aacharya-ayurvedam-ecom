@@ -216,6 +216,8 @@ const Checkout = () => {
   };
 
   const handleWhatsAppOrder = () => {
+    let num = whatsappNumber.replace(/\D/g, '');
+    if (num.length === 10) num = '91' + num;
     const itemsList = cart.map(item => `• ${item.name} x${item.quantity} — ₹${(Number(item.price) * item.quantity).toFixed(2)}`).join('\n');
     const message = encodeURIComponent(
       `Hello! I'd like to place an order:\n\n${itemsList}\n\n` +
@@ -228,7 +230,7 @@ const Checkout = () => {
       `Address: ${shipping.address}, ${shipping.city}, ${shipping.state} - ${shipping.postalCode}\n\n` +
       `Please confirm my order. Thank you!`
     );
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+    window.open(`https://wa.me/${num}?text=${message}`, '_blank');
   };
 
   const saveOrder = async (paymentResult, paymentMethod) => {

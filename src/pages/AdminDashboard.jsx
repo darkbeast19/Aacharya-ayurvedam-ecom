@@ -286,8 +286,14 @@ const AdminDashboard = () => {
   };
 
   const handleSaveSettings = () => {
+    let formattedWhatsapp = whatsappNumber.replace(/\D/g, '');
+    if (formattedWhatsapp.length === 10) {
+      formattedWhatsapp = '91' + formattedWhatsapp;
+      setWhatsappNumber(formattedWhatsapp);
+    }
+
     saveSection('settings', { 
-      whatsappNumber, 
+      whatsappNumber: formattedWhatsapp, 
       supportPhone, 
       supportEmail, 
       supportAddress, 
@@ -525,16 +531,16 @@ const AdminDashboard = () => {
                   <h3>WhatsApp Order Settings</h3>
                 </div>
                 <div className="input-group">
-                  <label>WhatsApp Phone Number (with country code, no + sign)</label>
+                  <label>WhatsApp Phone Number (with country code)</label>
                   <input 
                     type="text"
                     className="input-field" 
                     value={whatsappNumber}
-                    onChange={(e) => setWhatsappNumber(e.target.value.replace(/\D/g, ''))}
-                    placeholder="e.g., 919876543210"
+                    onChange={(e) => setWhatsappNumber(e.target.value.replace(/[^\d+]/g, ''))}
+                    placeholder="e.g., +919876543210"
                   />
                   <span className="text-sm text-muted" style={{ marginTop: '4px', display: 'block' }}>
-                    Format: Country code + number. Example: 91 for India + 10-digit number = 919876543210
+                    We automatically add the 91 country code if you only enter a 10-digit number.
                   </span>
                 </div>
                 <div style={{ padding: '12px 16px', background: 'rgba(37, 211, 102, 0.08)', borderRadius: '10px', fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: '8px' }}>

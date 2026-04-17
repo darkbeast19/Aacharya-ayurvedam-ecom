@@ -58,10 +58,12 @@ const ProductDetails = () => {
 
   const openWhatsApp = () => {
     if (!product) return;
+    let num = whatsappNumber.replace(/\D/g, '');
+    if (num.length === 10) num = '91' + num;
     const message = encodeURIComponent(
       `Hello! I'd like to order:\n\n*${product.name}*\nPrice: ₹${Number(product.price).toFixed(2)}\nProduct Link: ${window.location.href}\n\nPlease confirm availability and proceed with my order.`
     );
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+    window.open(`https://wa.me/${num}?text=${message}`, '_blank');
   };
 
   if (loading) {

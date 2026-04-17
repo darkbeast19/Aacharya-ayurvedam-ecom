@@ -53,8 +53,10 @@ const Home = () => {
   }, []);
 
   const openWhatsApp = () => {
+    let num = whatsappNumber.replace(/\D/g, '');
+    if (num.length === 10) num = '91' + num;
     const message = encodeURIComponent('Hello! I would like to place an order from Aacharya Ayurvedam. Please assist me.');
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+    window.open(`https://wa.me/${num}?text=${message}`, '_blank');
   };
 
   return (
